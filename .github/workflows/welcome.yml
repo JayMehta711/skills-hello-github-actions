@@ -2,14 +2,28 @@ name: Post welcome comment
 on:
   pull_request:
     types: [opened]
+
 permissions:
   pull-requests: write
+
 jobs:
   welcome:
     name: Post welcome comment
     runs-on: ubuntu-latest
     steps:
-      - run: gh pr comment "$PR_URL" --body "Welcome to the repository!"
+      - name: Release-specific comment
+        # This condition checks if the head branch starts with 'releases/'
+        if: startsWith(github.head_ref, 'releases/')
+        run: gh pr comment "$PR_URL" --body "The head of this PR starts with 'releases/'"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
+
+      - name: Default welcome comment
+        # This only runs if the branch DOES NOT start with 'releases/'
+        if: "!startsWith(github.head_ref, 'releases/')"
+        run: gh pr comment "$PR_URL" --body "Welcome to the repository!"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+
