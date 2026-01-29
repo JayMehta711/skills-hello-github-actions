@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Release-specific comment
-        # FIX: Check that the PR is actually being OPENED, not closed/merged
+        #Check that the PR is actually being OPENED, not closed/merged
         if: github.event.action == 'opened' && startsWith(github.head_ref, 'releases/')
         run: gh pr comment "$PR_URL" --body "The head of this PR starts with 'releases/'"
         env:
@@ -21,7 +21,7 @@ jobs:
           PR_URL: ${{ github.event.pull_request.html_url }}
 
       - name: Default welcome comment
-        # FIX: Check that the PR is being OPENED
+        # Check that the PR is being OPENED
         if: github.event.action == 'opened' && !startsWith(github.head_ref, 'releases/')
         run: gh pr comment "$PR_URL" --body "Welcome to the repository!"
         env:
