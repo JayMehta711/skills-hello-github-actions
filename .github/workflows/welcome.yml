@@ -8,7 +8,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  manage-comments:
+  welcome:
+    name: Welcome Messages
     runs-on: ubuntu-latest
     steps:
       - name: Release-specific welcome
