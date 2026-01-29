@@ -1,39 +1,45 @@
 name: Post welcome comment
+
 on:
   pull_request:
-    types: [opened, closed]
+    types: [opened, closed] # Both are needed: opened for welcome, closed for merge
 
 permissions:
   pull-requests: write
 
 jobs:
   welcome:
-    name: Post welcome comment
+    name: Welcome Messages
     runs-on: ubuntu-latest
     steps:
       - name: Release-specific comment
-        # This condition checks if the head branch starts with 'releases/'
-        if: startsWith(github.head_ref, 'releases/')
+        # FIX: Check that the PR is actually being OPENED, not closed/merged
+        if: github.event.action == 'opened' && startsWith(github.head_ref, 'releases/')
         run: gh pr comment "$PR_URL" --body "The head of this PR starts with 'releases/'"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
 
       - name: Default welcome comment
-        # This only runs if the branch DOES NOT start with 'releases/'
-        if: "!startsWith(github.head_ref, 'releases/')"
+        # FIX: Check that the PR is being OPENED
+        if: github.event.action == 'opened' && !startsWith(github.head_ref, 'releases/')
         run: gh pr comment "$PR_URL" --body "Welcome to the repository!"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
-          
-  # The new job that runs ONLY on merge
+
   if_merged:
     name: Run only on merge
+    # This job only executes when the PR is merged
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Log merge status
-        run: |
-          echo "The PR was merged"
+        run: echo "The PR was merged"
+      - name: Post merge comment
+        run: gh pr comment "$PR_URL" --body "The PR was merged!"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+
 
