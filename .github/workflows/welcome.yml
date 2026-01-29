@@ -1,7 +1,7 @@
 name: Post welcome comment
 on:
   pull_request:
-    types: [opened]
+    types: [opened, closed]
 
 permissions:
   pull-requests: write
@@ -26,4 +26,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
+          
+  # The new job that runs ONLY on merge
+  if_merged:
+    name: Run only on merge
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log merge status
+        run: |
+          echo "The PR was merged"
 
